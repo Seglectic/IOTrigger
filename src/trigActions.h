@@ -8,17 +8,21 @@ struct TriggerAction { // Action struct that holds callback and parameters for e
 
 TriggerAction triggerActions[6]; // Array of TA structs
 
-// char homeAssistantIP[] = "192.168.1.99";
-
-// Home Assistant Configuration
-const char* HA_URL = "http://192.168.1.99:8123/api/services/";
-// String HA_TOKEN = "INSERT_TOKEN";  // Replace with your actual token
-
-void setAction(int index, TriggerAction action){ //Sets an index in the array to the specified action
+void setAction(int index, TriggerAction action){  //Sets an index in the array to the specified action
   if (index >= 0 && index < sizeof(triggerActions) / sizeof(triggerActions[0])) {
     triggerActions[index] = action;
   }
 }
+
+
+
+
+
+
+// ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+// │                                            Send Home Assistant Request                                            │
+// ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+const char* HA_URL = "http://192.168.1.99:8123/api/services/";
 
 void homeAssistantAction(const char* domain="",const char* entity="",const char* service=""){
   WiFiManager wm;
@@ -36,7 +40,7 @@ void homeAssistantAction(const char* domain="",const char* entity="",const char*
     }
 
     // Load Home Assistant Key from file
-    File haKeyFile = SPIFFS.open("/homeAssistantKey.txt","r");
+    File haKeyFile = SPIFFS.open("/haToken.txt","r");
     String haKey = haKeyFile.readString();
     haKey.trim();
     haKeyFile.close();
@@ -69,6 +73,38 @@ void homeAssistantAction(const char* domain="",const char* entity="",const char*
   display.display();
   return;
 }
+
+
+// ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+// │                                                  Host Web Portal                                                  │
+// ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+void webPageAction(const char* unused1, const char* unused2, const char* unused3) {
+  WiFiManager wm;
+  if (!wm.autoConnect("IOTrigger")) {
+    buzzError();
+    return;
+  }
+
+  display.setRotation(0);
+  display.setFont(&Picopixel);
+  display.setCursor(2,5);
+  display.println("Hosting Server..");
+  display.println(WiFi.localIP());
+  display.display();
+  
+  server.on("/", handleRoot);
+  server.on("/submit", HTTP_POST, handleSubmit);
+  server.on("/haToken", HTTP_POST, handleToken);
+  server.begin();
+
+  // Handle clients (for a non-blocking version, integrate server.handleClient() into your main loop)
+  while (true) {
+    server.handleClient();     // Handle web requests
+    if(digitalRead(1)){break;} // Break if you pull the trigger
+    delay(1);                  // Yield to avoid watchdog issues
+  }
+}
+
 
 
 void actionSetup(){ // Apply the default actions to the triggerActions array

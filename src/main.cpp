@@ -43,7 +43,7 @@
 // │  Globals  │
 // ╰───────────╯
 unsigned long lastActionTime = 0;          // Tracks last time a button was pressed or action occured
-unsigned long executionTimer = 300;        // How much time should remain after an action is made
+unsigned long executionTimer = 500;        // How much time should remain after an action is made
 int           triggerCount   = 0;          // Incremented on each button press (volatile to be avail in interrupt)
 bool          triggerPull    = false;      // Flag for trigger pulling event
 unsigned long lastPressTime  = 0;          // Track time of last press for debouncin
@@ -75,18 +75,16 @@ void IRAM_ATTR triggerInterrupt() {triggerPull = true;}
 // ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 void setup() {
   esp_sleep_enable_ext1_wakeup(WAKE_UP_PIN_BITMASK, ESP_EXT1_WAKEUP_ANY_HIGH);  // Apply wake bitmask upon going HIGH
-  pinMode(LED_BUILTIN, OUTPUT);                                                 // Enable output for the built in LED
-  analogWrite(LED_BUILTIN,255);                                                 // Init the LED off
+  pinMode(LED_BUILTIN, OUTPUT);                                                 // Enable output for the built in LED   
+  digitalWrite(LED_BUILTIN, HIGH);                                              // Init the LED off 
   pinMode(1, INPUT_PULLDOWN);                                                   // Enable pull-down resistor on D1 wake pin
   attachInterrupt(digitalPinToInterrupt(1), triggerInterrupt, RISING);          // Trigger on RISING edge 
   pinMode(19,OUTPUT);                                                           // Vibrator Buzzer Pin
+  SPIFFS.begin();                                                               // Start SPIFFS for loading- stuff from flash
   displaySetup();
   buzz(100,255);
-  SPIFFS.begin(); // Start SPIFFS for loading- stuff from flash
-  // buzzError();
   // wifiConnect(); 
   actionSetup();
-
 }
 
 // ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮

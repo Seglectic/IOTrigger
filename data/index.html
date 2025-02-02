@@ -1,33 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configure Action</title>
-</head>
-<body>
-    <h1>Configure Action</h1>
+  <!-- // ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+      // │                                                        CSS                                                        │
+      // ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯ -->
+    <style>
+      /* Dark Mode Style/ */
+      body {
+        background-color: #121212;
+        color: #E0E0E0;
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        padding: 0;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      form {
+        max-width: 400px;
+        margin: auto;
+        background: #1e1e1e;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
+      }
+
+      label {
+        display: block;
+        margin-top: 10px;
+        font-weight: bold;
+      }
+
+      select, input[type="text"], input[type="submit"] {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        background: #333;
+        color: #E0E0E0;
+        border: 1px solid #444;
+        border-radius: 4px;
+      }
+
+      input[type="submit"] {
+        background: #3700B3;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        border: none;
+      }
+
+      input[type="submit"]:hover {
+        background: #3700B3;
+      }
+    </style>
+  </head>
+
+  <!-- // ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+      // │                                                       HTML                                                        │
+      // ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯ -->
+  <body>
+    <h1>I/O Trigger Config Portal</h1>
+    <br>
     <form method="POST" action="/submit">
-        <label for="callback">Callback:</label>
-        <select name="callback" id="callback">
-            <option value="callback1">Callback 1</option>
-            <option value="callback2">Callback 2</option>
-        </select>
-        <br><br>
-
-        <label for="param1">Param1:</label>
-        <input type="text" name="param1" id="param1">
-        <br><br>
-
-        <label for="param2">Param2:</label>
-        <input type="text" name="param2" id="param2">
-        <br><br>
-
-        <label for="param3">Param3:</label>
-        <input type="text" name="param3" id="param3">
-        <br><br>
-
-        <input type="submit" value="Submit">
+      <label>
+        <h2>Action Configurator</h2>
+      </label>
+      <label for="callback">Callback:</label>
+      <select name="callback" id="callback">
+        <option value="callback1">Callback 1</option>
+        <option value="callback2">Callback 2</option>
+      </select>
+      <br><br>
+      <label for="param1">Param1:</label>
+      <input type="text" name="param1" id="param1">
+      <br><br>
+      <label for="param2">Param2:</label>
+      <input type="text" name="param2" id="param2">
+      <br><br>
+      <label for="param3">Param3:</label>
+      <input type="text" name="param3" id="param3">
+      <br><br>
+      <input type="submit" value="Submit">
     </form>
-</body>
+
+    <!-- Home Assistant Token Form -->
+    <br>
+    <form id="ha-token-form" method="POST" action="/haToken">
+      <label for="haToken">Home Assistant Token:</label>
+      <input type="text" name="haToken" id="haToken">
+      <br><br>
+      <input type="submit" value="Save Token">
+    </form>
+
+
+ <!-- // ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+      // │                                                      Script                                                       │
+      // ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯ -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        console.log("Ready.");
+        
+        const haTokenForm = document.getElementById("ha-token-form");
+
+        haTokenForm.addEventListener("submit", (e) => {
+          e.preventDefault(); 
+          const tokenInput = document.getElementById("haToken");  // Grab the input field from DOM
+          const token = tokenInput.value;                         // Grab the value of the field as 'token'
+          tokenInput.value = "";                                  // Clear the value from DOM for some user feedback
+          fetch("/haToken", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded" //NOTE Using URL Encoding instead of JSON to save flash
+            },
+            body: "haToken=" + encodeURIComponent(token)
+          }).then(response => {
+            const wasOk = response.ok;
+            return response.text().then(text => {
+              console.log(wasOk ? "Token submission successful.\n Response: "+text : "Token submission failed.");
+            });
+          })
+          .catch(error => console.error("Error during token submission:", error));
+        });
+          
+
+      });
+    </script>
+  </body>
 </html>
