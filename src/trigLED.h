@@ -4,6 +4,6 @@ int LEDBrightness            = 0;        // Current brightness of the builtin LE
 void ledTick(){ //Slowly fades the LED up
   if (LEDBrightness<255){
     analogWrite(LED_BUILTIN,255-LEDBrightness);
-    LEDBrightness+=8;
+    LEDBrightness+=16;
   }
 }

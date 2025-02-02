@@ -13,6 +13,21 @@ void buzz(int buzzDur, int str){
     analogWrite(BUZZPIN, str);
 }
 
+// Buzz animation that pulses 3 times to indicate error
+void buzzError(){ 
+  digitalWrite(BUZZPIN, HIGH);
+  delay(200);
+  digitalWrite(BUZZPIN, LOW);
+  delay(200);
+  digitalWrite(BUZZPIN, HIGH);
+  delay(200);
+  digitalWrite(BUZZPIN, LOW);
+  delay(200);
+  digitalWrite(BUZZPIN, HIGH);
+  delay(200);
+  digitalWrite(BUZZPIN, LOW);
+}
+
 
 void buzzTick(){
   if (vibing && (millis()>=buzzTime)){

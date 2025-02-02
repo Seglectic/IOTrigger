@@ -11,20 +11,19 @@
 #define SCREEN_ADDRESS 0x3C // 0x3C for 128x32 or 0x3D for 128x64
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
-
 // ╭───────────────────────╮
 // │  Global Display Vars  │
 // ╰───────────────────────╯
-
 // Status Frame - Upper region for numerical display
 int16_t statusWidth = 32;
 int16_t statusHeight = 32;
+bool    countInversion = false;
+
 // Panel Frame - Lower region for status, icons, 
 int16_t panelX = 0;
 int16_t panelY = 32;
 int16_t panelHeight = 96;
 int16_t panelWidth = 32;
-
 
 // ╭─────────╮
 // │  Setup  │
@@ -43,16 +42,18 @@ void displayShutdown(){
   display.ssd1306_command(SSD1306_DISPLAYOFF); 
 }
 
-// ╭──────────────────╮
-// │  Status Section  │
-// ╰──────────────────╯
+// ╭──────────────────────────╮
+// │  Status Section (Count)  │
+// ╰──────────────────────────╯
 void displayStatus(){
   display.fillRect(0,0,32,32,BLACK);  // Clear the top portion of the display
   display.setFont(&FreeSansBold18pt7b);
   display.setCursor(7,24); 
   display.setTextSize(1); 
   display.setTextColor(WHITE);
-  display.print(6-triggerCount);
+  (countInversion) ? 
+    display.print(6-triggerCount):
+    display.print(triggerCount);
 }
 
 // ╭──────────────────────────╮
@@ -71,13 +72,12 @@ void displayTimeout(){
 void displayPanel(){ //Lower frame drawing
   display.drawRect(panelX,panelY,panelWidth,panelHeight,WHITE);     // Draw rect around the region
   displayTimeout();
-  // display.fillRect(panelX+1,panelY+1,panelWidth-1,panelHeight-1,BLACK); //Clear the internal region
 }
 
 // ╭─────────────────────────╮
 // │  Animated screen clear  │
 // ╰─────────────────────────╯
-void screenClear(uint8_t step){
+void displayClear(uint8_t step){
   display.setRotation(2);
   for (size_t i = 0; i < 128; i+=step){
     display.fillRect(i,0,step,32,WHITE);

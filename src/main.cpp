@@ -2,6 +2,7 @@
 #include <esp_sleep.h>
 #include <SPI.h>
 #include <Wire.h>
+#include <SPIFFS.h>
 
 
 // ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
@@ -33,15 +34,15 @@
 #define ADC_REF_VOLTAGE       4.2          // Reference voltage (depends on ESP32's power source)
 #define DEBOUNCE_DELAY        20           // Button debounce period
 
-// ╭───────────────╮
-// │  Global Vars  │
-// ╰───────────────╯
+// ╭───────────╮
+// │  Globals  │
+// ╰───────────╯
 unsigned long lastActionTime = 0;          // Tracks last time a button was pressed or action occured
-int executionTimer           = 1200;       // How much time should remain after an action is made
-int triggerCount             = 0;          // Incremented on each button press (volatile to be avail in interrupt)
-bool triggerPull             = false;      // Flag for trigger pulling event
+unsigned long executionTimer = 1200;       // How much time should remain after an action is made
+int           triggerCount   = 0;          // Incremented on each button press (volatile to be avail in interrupt)
+bool          triggerPull    = false;      // Flag for trigger pulling event
 unsigned long lastPressTime  = 0;          // Track time of last press for debouncin
-int interval                 = 20 ;        // Interval for main loop
+int           interval       = 20;         // Interval for main loop
 
 // ╭─────────────────────────╮
 // │  Load custom libraries  │
@@ -50,6 +51,9 @@ int interval                 = 20 ;        // Interval for main loop
 #include <trigDisp.h>
 #include <trigWiFi.h>
 #include <trigBuzz.h>
+#include <trigPower.h>
+#include <trigWebPortal.h>
+#include <trigActions.h>
 #include <executioner.h>
 
 // ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
@@ -73,7 +77,11 @@ void setup() {
   pinMode(19,OUTPUT);                                                           // Vibrator Buzzer Pin
   displaySetup();
   buzz(100,255);
+  SPIFFS.begin(); // Start SPIFFS for loading- stuff from flash
+  // buzzError();
   // wifiConnect(); 
+  actionSetup();
+
 }
 
 // ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
@@ -85,13 +93,8 @@ void loop() {
   buzzTick();
   ledTick();
   if(digitalRead(1)){lastActionTime=millis();}
+  handleTriggerPull();
+  triggerTick();
   display.display();
-  triggerExecution();
-  if (millis() - lastActionTime >= executionTimer) {     // Check for inactivity timeout
-    screenClear(6);                                      // Show a visual of the screen turning off
-    displayShutdown();                                   // Turn off the display
-    esp_deep_sleep_start();                              // Enter deep sleep
-  }
-
   delay(interval);
 }

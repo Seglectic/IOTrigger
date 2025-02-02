@@ -1,5 +1,7 @@
 #include <WiFi.h>
 #include <WiFiManager.h>
+#include <WiFiUdp.h>
+#include <HTTPClient.h>
 
 void wifiConnect() {
 

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Action</title>
+</head>
+<body>
+    <h1>Configure Action</h1>
+    <form method="POST" action="/submit">
+        <label for="callback">Callback:</label>
+        <select name="callback" id="callback">
+            <option value="callback1">Callback 1</option>
+            <option value="callback2">Callback 2</option>
+        </select>
+        <br><br>
+
+        <label for="param1">Param1:</label>
+        <input type="text" name="param1" id="param1">
+        <br><br>
+
+        <label for="param2">Param2:</label>
+        <input type="text" name="param2" id="param2">
+        <br><br>
+
+        <label for="param3">Param3:</label>
+        <input type="text" name="param3" id="param3">
+        <br><br>
+
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
