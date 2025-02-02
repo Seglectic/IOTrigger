@@ -8,6 +8,9 @@ void handleRoot() {
   File file = SPIFFS.open("/index.html","r"); // Load the index page from SPIFFS
   // server.send(200, "text/html", html);
   server.streamFile(file,"text/html");
+  digitalWrite(BUZZPIN,HIGH);
+  delay(50);
+  digitalWrite(BUZZPIN,LOW);
   file.close();
 }
 
@@ -47,6 +50,7 @@ void webPageAction(const char* unused1, const char* unused2, const char* unused3
   while (true) {
     server.handleClient();
     delay(1); // Yield to avoid watchdog issues
+    if(digitalRead(1)){break;}
   }
 }
 

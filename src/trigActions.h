@@ -60,7 +60,7 @@ void homeAssistantAction(const char* domain="",const char* entity="",const char*
 
     // If request was successful (HTTP 200 or 202), give success haptic feedback
     if (httpResponseCode == 200 || httpResponseCode == 202) {
-        buzz(300, 255);  // Success haptic feedback
+        // buzz(300, 255);  // Success haptic feedback
     } else {
         // buzzError();  // Failure haptic feedback
         // buzzError();
@@ -75,6 +75,6 @@ void actionSetup(){ // Apply the default actions to the triggerActions array
     TriggerAction haAction = {homeAssistantAction, "light", "light.minikey", "toggle"};
     TriggerAction webPortalAction = {webPageAction};
     
-    setAction(0, haAction);
-    setAction(1,webPortalAction);
+    setAction(1, haAction);
+    setAction(2,webPortalAction);
 }
