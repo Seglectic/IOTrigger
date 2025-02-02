@@ -1,5 +1,7 @@
 #include <WebServer.h>
 
+//TODO - Add a wifi signal indicator to update 
+//TODO - Create an update routine to be run from the main loop?
 
 
 WebServer server(80); // Web server instance

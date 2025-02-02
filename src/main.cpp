@@ -12,12 +12,17 @@
 // ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 
-// TODO - Make wifi onboarding smooth to configure and be re-configurable by user
-// TODO - Create 'executioner' timer that executes action after like 1s inactivity
-// TODO - Separate header file for buzz
-// TODO - Wake On LAN request
-// TODO - Create a web request trigger
-// TODO - Create something that maps number of trigger pulls to a function call
+// TODO - Make wifi onboarding smooth to configure and be re-configurable by user  ✅
+// TODO - Create 'executioner' timer that executes action after like 1s inactivity ✅
+// TODO - Separate header file for buzz                                            ✅
+// TODO - Create something that maps number of trigger pulls to a function call    ✅
+// TODO - Home Assistant action                                                    ✅
+// TODO - Update actions to be loaded from file upon boot❗️
+// TODO - Web Portal 
+// TODO  |- Have selectable divs that choose 1 of the 6 actions
+// TODO  |- Flesh out the submit action to save action to file
+// TODO - ACTION - Create a web generic request
+// TODO - ACTION - Wake On LAN request 
 
 // ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 // │                                                       Init                                                        │
@@ -38,11 +43,11 @@
 // │  Globals  │
 // ╰───────────╯
 unsigned long lastActionTime = 0;          // Tracks last time a button was pressed or action occured
-unsigned long executionTimer = 1200;       // How much time should remain after an action is made
+unsigned long executionTimer = 300;        // How much time should remain after an action is made
 int           triggerCount   = 0;          // Incremented on each button press (volatile to be avail in interrupt)
 bool          triggerPull    = false;      // Flag for trigger pulling event
 unsigned long lastPressTime  = 0;          // Track time of last press for debouncin
-int           interval       = 20;         // Interval for main loop
+int           interval       = 5;          // Interval for main loop
 
 // ╭─────────────────────────╮
 // │  Load custom libraries  │

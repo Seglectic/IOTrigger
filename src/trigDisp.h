@@ -3,6 +3,8 @@
 #include <Fonts/Picopixel.h>
 #include <Fonts/FreeSansBold18pt7b.h>
 
+// TODO - Add a battery display widget to the panel
+
 // ╭────────────────╮
 // │  Display Init  │
 // ╰────────────────╯
