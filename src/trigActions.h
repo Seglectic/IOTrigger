@@ -1,3 +1,12 @@
+// ╭─────────────────────────────────────────╮
+// │  Trigger Actions                        │
+// │                                         │
+// │  Defines the TriggerAction Struct       │
+// │  and associated functions for saving    │
+// │  loading, and setup. Some actions also  │
+// │  defined here.                          │
+// ╰─────────────────────────────────────────╯
+
 
 struct TriggerAction { // Action struct that holds callback and parameters for execution.
     void (*callback)(const char*, const char*, const char*) = nullptr;
@@ -14,27 +23,25 @@ void setAction(int index, TriggerAction action){  //Sets an index in the array t
   }
 }
 
-// Action Callback pointer type for clarity.
-typedef void (*ActionCallback)(const char*, const char*, const char*);
-
 // Callback forward declarations
 void homeAssistantAction(const char*, const char*, const char*);
-void webPageAction(const char*, const char*, const char*);
+void webPortalAction(const char*, const char*, const char*);
 
 // ╭────────────────────╮
 // │  Helper functions  │
 // ╰────────────────────╯
+//TODO Make this some sorta map or something
 
 // Return a string name from the callback pointer
 String getNameFromCallback(ActionCallback cb) {  
   if (cb == homeAssistantAction) return "homeAssistantAction";
-  if (cb == webPageAction) return "webPageAction";
+  if (cb == webPortalAction) return "webPortalAction";
   return ""; // unknown
 }
 // Return a callback from its string name
 ActionCallback getCallbackFromName(const String &name) { 
   if (name == "homeAssistantAction") return homeAssistantAction;
-  if (name == "webPageAction") return webPageAction;
+  if (name == "webPortalAction") return webPortalAction;
   return nullptr;
 }
 
@@ -127,6 +134,20 @@ const char* HA_URL = "http://192.168.1.99:8123/api/services/";
 
 void homeAssistantAction(const char* domain="",const char* entity="",const char* service=""){
   WiFiManager wm;
+
+    display.setFont(&Picopixel); // Replace this with a generic function in trigDisp for erroring //FIXME
+    display.setRotation(0);
+    display.setCursor(0,5);
+    display.drawPixel(100,5,WHITE);
+    display.println(domain);
+    display.println(entity);
+    display.println(service);
+    display.display();
+    delay(1000);
+
+    // display.print("Response: ");
+    // display.println(httpResponseCode);
+
       
     // Attempt to connect to stored WiFi credentials
     if (!wm.autoConnect("IOTrigger", nullptr)) {  
@@ -156,11 +177,7 @@ void homeAssistantAction(const char* domain="",const char* entity="",const char*
     http.addHeader("Content-Type", "application/json");
 
     int httpResponseCode = http.POST(payload); 
-    display.setFont(&Picopixel); // Replace this with a generic function in trigDisp for erroring
-    display.setRotation(0);
-    display.setCursor(33,5);
-    display.print("Response: ");
-    display.println(httpResponseCode);
+
     http.end();
 
     // If request was successful (HTTP 200 or 202), give success haptic feedback
@@ -176,51 +193,23 @@ void homeAssistantAction(const char* domain="",const char* entity="",const char*
 }
 
 
-// ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-// │                                                  Host Web Portal                                                  │
-// ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-void webPageAction(const char* unused1, const char* unused2, const char* unused3) {
-  WiFiManager wm;
-  if (!wm.autoConnect("IOTrigger")) {
-    buzzError();
-    return;
-  }
 
-  display.setRotation(0);
-  display.setFont(&Picopixel);
-  display.setCursor(2,5);
-  display.println("Hosting Server..");
-  display.println(WiFi.localIP());
-  display.display();
-  
-  server.on("/", handleRoot);
-  server.on("/submit", HTTP_POST, handleSubmit);
-  server.on("/haToken", HTTP_POST, handleToken);
-  server.begin();
-
-  // Handle clients (for a non-blocking version, integrate server.handleClient() into your main loop)
-  while (true) {
-    server.handleClient();     // Handle web requests
-    if(digitalRead(1)){break;} // Break if you pull the trigger
-    delay(1);                  // Yield to avoid watchdog issues
-  }
-}
 
 
 
 void actionSetup(){ // Apply the default actions to the triggerActions array
   loadActions();
 
-  // The following can set default actions when uncommented:
+  // The following can set default acti+ons when uncommented:
   
   // First create a TriggerAction struct
+  TriggerAction portalAction = {webPortalAction};
   // TriggerAction haAction = {homeAssistantAction, "light", "light.minikey", "toggle"};
-  // TriggerAction webPortalAction = {webPageAction};
 
   // Then set those TriggerActions to the main actions array
-  // setAction(1, haAction);
-  // setAction(2,webPortalAction);
+  setAction(1, portalAction); // 1 aka double-tap
+  // setAction(2, haAction);
 
   // And optionally save them to file.
-  // saveActions();
+  saveActions();
 }

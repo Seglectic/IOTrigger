@@ -3,7 +3,7 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <SPIFFS.h>
-
+#include <WebServer.h>
 
 // ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 // │                                                     IOTrigger                                                     │
@@ -11,18 +11,24 @@
 // │                                               Seglectic Systems '24                                               │
 // ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
-
+// TODO - General
 // TODO - Make wifi onboarding smooth to configure and be re-configurable by user  ✅
 // TODO - Create 'executioner' timer that executes action after like 1s inactivity ✅
 // TODO - Separate header file for buzz                                            ✅
 // TODO - Create something that maps number of trigger pulls to a function call    ✅
 // TODO - Home Assistant action                                                    ✅
-// TODO - Update actions to be loaded from file upon boot❗️
-// TODO - Web Portal 
-// TODO  |- Have selectable divs that choose 1 of the 6 actions
-// TODO  |- Flesh out the submit action to save action to file
-// TODO - ACTION - Create a web generic request
-// TODO - ACTION - Wake On LAN request 
+// TODO - Update actions to be loaded from file upon boot                          ✅
+// TODO - Get long pull action working to load web portal
+// TODO - Add a reusable battery indicator to trigDisp, put in web portal loop
+// TODO - Add icons for diferent action types and display under numbers
+
+
+// TODO - Web Portal  
+// TODO  |- Have selectable divs that choose 1 of the 6 actions                    ✅
+// TODO  |- Flesh out the submit action to save action to file                     ✅
+// TODO - Clean up the visuals of the portal
+// TODO - ACTION - Create a web generic request action
+// TODO - ACTION - Wake On LAN request action
 
 // ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 // │                                                       Init                                                        │
@@ -44,10 +50,16 @@
 // ╰───────────╯
 unsigned long lastActionTime = 0;          // Tracks last time a button was pressed or action occured
 unsigned long executionTimer = 500;        // How much time should remain after an action is made
-int           triggerCount   = 0;          // Incremented on each button press (volatile to be avail in interrupt)
+unsigned long longPullTime   = 3000;       // How long to wait until we should execute the Long Pull action
+int           triggerCount   = 0;          // Incremented on each button press
 bool          triggerPull    = false;      // Flag for trigger pulling event
 unsigned long lastPressTime  = 0;          // Track time of last press for debouncin
 int           interval       = 5;          // Interval for main loop
+WebServer server(80); // Web server instance
+
+// Action Callback pointer type for clarity.
+typedef void (*ActionCallback)(const char*, const char*, const char*);
+
 
 // ╭─────────────────────────╮
 // │  Load custom libraries  │
@@ -57,8 +69,8 @@ int           interval       = 5;          // Interval for main loop
 #include <trigWiFi.h>
 #include <trigBuzz.h>
 #include <trigPower.h>
-#include <trigWebPortal.h>
 #include <trigActions.h>
+#include <trigWebPortal.h>
 #include <executioner.h>
 
 // ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
@@ -85,19 +97,22 @@ void setup() {
   buzz(100,255);
   // wifiConnect(); 
   actionSetup();
+
 }
 
 // ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 // │                                                         Loop                                                      │
 // ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 void loop() {
+  unsigned long currentMillis = millis();
+
   displayStatus(); 
   displayPanel();
   buzzTick();
   ledTick();
-  if(digitalRead(1)){lastActionTime=millis();}
-  handleTriggerPull();
-  triggerTick();
+  if(digitalRead(1)){lastActionTime=currentMillis;}
+  handleTriggerPull(currentMillis);
+  triggerTick(currentMillis);
   display.display();
   delay(interval);
 }

@@ -1,3 +1,6 @@
+// ╭───────────────────────────╮
+// │  Power related functions  │
+// ╰───────────────────────────╯
 
 void powerDown(){
     displayClear(6);                                      // Show a visual of the screen turning off

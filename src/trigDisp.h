@@ -55,7 +55,7 @@ void displayStatus(){
   display.setTextColor(WHITE);
   (countInversion) ? 
     display.print(6-triggerCount):
-    display.print(triggerCount);
+    display.print(triggerCount+1);
 }
 
 // ╭──────────────────────────╮

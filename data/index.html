@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configure Action</title>
-  <!-- // ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-      // │                                                        CSS                                                        │
+  <!-- // ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+      // │                                                        CSS 🖼️                                                     │
       // ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯ -->
     <style>
       /* Dark Mode Style/ */
@@ -57,36 +57,103 @@
       input[type="submit"]:hover {
         background: #3700B3;
       }
+
+      /* Configure Action Div Styles */
+      #configure-action {
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+        background: #1e1e1e;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        margin-bottom: 20px;
+      }
+
+      #action-squares {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .action-square {
+        display: inline-block;
+        width: 50px;
+        height: 50px;
+        line-height: 50px;
+        margin: 5px;
+        border: 2px solid #444;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .action-square.active {
+        border-color: #6200ee;
+        background: #333;
+      }
+
+      /* Input styles inside Configure Action */
+      #configure-action input[type="text"] {
+        width: calc(100% - 16px);
+        padding: 8px;
+        margin: 8px 0;
+        background: #333;
+        color: #e0e0e0;
+        border: 1px solid #444;
+        border-radius: 4px;
+      }
+
+      #configure-action input[type="submit"] {
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        background: #6200ee;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
     </style>
   </head>
 
-  <!-- // ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-      // │                                                       HTML                                                        │
+  <!-- // ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+      // │                                                       HTML 🌎                                                     │
       // ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯ -->
   <body>
     <h1>I/O Trigger Config Portal</h1>
     <br>
-    <form method="POST" action="/submit">
-      <label>
-        <h2>Action Configurator</h2>
-      </label>
-      <label for="callback">Callback:</label>
-      <select name="callback" id="callback">
-        <option value="callback1">Callback 1</option>
-        <option value="callback2">Callback 2</option>
-      </select>
-      <br><br>
-      <label for="param1">Param1:</label>
-      <input type="text" name="param1" id="param1">
-      <br><br>
-      <label for="param2">Param2:</label>
-      <input type="text" name="param2" id="param2">
-      <br><br>
-      <label for="param3">Param3:</label>
-      <input type="text" name="param3" id="param3">
-      <br><br>
-      <input type="submit" value="Submit">
-    </form>
+
+    <!-- Configure Action Div -->
+    <div id="configure-action">
+      <h2>Configure Action</h2>
+      <div id="action-squares">
+        <div class="action-square" data-index="0">1</div>
+        <div class="action-square" data-index="1">2</div>
+        <div class="action-square" data-index="2">3</div>
+        <div class="action-square" data-index="3">4</div>
+        <div class="action-square" data-index="4">5</div>
+        <div class="action-square" data-index="5">6</div>
+      </div>
+      <!-- Form for updating a single TriggerAction -->
+      <form id="action-form" method="POST" action="/updateAction">
+        <!-- Hidden field to store the selected action index -->
+        <input type="hidden" name="index" id="action-index" value="" />
+        <label for="callback">Callback:</label>
+        <select name="callback" id="callback">
+          <option value="homeAssistantAction">homeAssistantAction</option>
+          <option value="webPortalAction">Host Web Portal</option>
+        </select>
+        <div id="params-container">
+          <label for="param1">Param1:</label>
+          <input type="text" name="param1" id="param1" placeholder="Enter param1" />
+          <label for="param2">Param2:</label>
+          <input type="text" name="param2" id="param2" placeholder="Enter param2" />
+          <label for="param3">Param3:</label>
+          <input type="text" name="param3" id="param3" placeholder="Enter param3" />
+        </div>
+        <input type="submit" value="Submit Action"/>
+      </form>
+    </div>
+
+
 
     <!-- Home Assistant Token Form -->
     <br>
@@ -99,14 +166,78 @@
 
 
  <!-- // ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-      // │                                                      Script                                                       │
+      // │                                                      Script 💻👾                                                  │
       // ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯ -->
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         console.log("Ready.");
         
-        const haTokenForm = document.getElementById("ha-token-form");
 
+// ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+// │                                                 Configure Action   ✅                                             │
+// ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+        // Handle selector square clicks
+        const squares = document.querySelectorAll(".action-square");
+        let selectedIndex = null;
+        squares.forEach((square) => {
+          square.addEventListener("click", () => {
+            // Remove active class from all squares
+            squares.forEach((sq) => sq.classList.remove("active"));
+            // Add active class to the clicked square
+            square.classList.add("active");
+            selectedIndex = square.getAttribute("data-index");
+            document.getElementById("action-index").value = selectedIndex;
+          });
+        });
+
+        // Toggle parameter fields based on callback selection //TODO Only shows or hides, will need to show only 1 later
+        const callbackSelect = document.getElementById("callback");
+        const paramsContainer = document.getElementById("params-container");
+        const toggleParams = () => {
+          if (callbackSelect.value === "webPortalAction") {
+            paramsContainer.style.display = "none";
+          } else {
+            paramsContainer.style.display = "block";
+          }
+        };
+        // Initialize display based on default value
+        toggleParams();
+        callbackSelect.addEventListener("change", toggleParams);
+
+
+        // Handle submission of the Configure Action form
+        const actionForm = document.getElementById("action-form");
+        actionForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const formData = new URLSearchParams(new FormData(actionForm)).toString();
+          fetch("/updateAction", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: formData
+          })
+            .then((response) => {
+              const wasOk = response.ok;
+              return response.text().then((text) => {
+                console.log("Server response:", text);
+                console.log(
+                  wasOk
+                    ? "Action submission successful."
+                    : "Action submission failed."
+                );
+              });
+            })
+            .catch((error) =>
+              console.error("Error during action submission:", error)
+            );
+        });
+
+
+  // ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+  // │                                               Home Assistant Token  🔑                                            │
+  // ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+        const haTokenForm = document.getElementById("ha-token-form");
         haTokenForm.addEventListener("submit", (e) => {
           e.preventDefault(); 
           const tokenInput = document.getElementById("haToken");  // Grab the input field from DOM
@@ -126,6 +257,8 @@
           })
           .catch(error => console.error("Error during token submission:", error));
         });
+
+        
           
 
       });
