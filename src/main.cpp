@@ -1,8 +1,7 @@
 #include <Arduino.h>
 #include <esp_sleep.h>
-#include <SPI.h>
-#include <Wire.h>
-#include <SPIFFS.h>
+// #include <Wire.h>
+#include <LittleFS.h>
 #include <WebServer.h>
 
 // ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
@@ -92,12 +91,10 @@ void setup() {
   pinMode(1, INPUT_PULLDOWN);                                                   // Enable pull-down resistor on D1 wake pin
   attachInterrupt(digitalPinToInterrupt(1), triggerInterrupt, RISING);          // Trigger on RISING edge 
   pinMode(19,OUTPUT);                                                           // Vibrator Buzzer Pin
-  SPIFFS.begin();                                                               // Start SPIFFS for loading- stuff from flash
+  LittleFS.begin();                                                             // Start LittleFS for loading- stuff from flash
   displaySetup();
   buzz(100,255);
-  // wifiConnect(); 
   actionSetup();
-
 }
 
 // ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮

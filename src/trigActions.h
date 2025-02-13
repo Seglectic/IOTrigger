@@ -50,7 +50,7 @@ ActionCallback getCallbackFromName(const String &name) {
 // │  Saves TriggerActions array to text file  │
 // ╰───────────────────────────────────────────╯
 void saveActions() {
-  File file = SPIFFS.open("/trigActions.txt", "w");
+  File file = LittleFS.open("/trigActions.txt", "w");
   if (!file) {
     // Serial.println("Failed to open trigActions.txt for writing");
     return;
@@ -76,7 +76,7 @@ void saveActions() {
 // │  One action per line, delimited by |        │
 // ╰─────────────────────────────────────────────╯
 void loadActions() {
-  File file = SPIFFS.open("/trigActions.txt", "r");
+  File file = LittleFS.open("/trigActions.txt", "r");
   if (!file) {
     // Serial.println("Failed to open trigActions.txt for reading");
     return;
@@ -162,7 +162,7 @@ void homeAssistantAction(const char* domain="",const char* entity="",const char*
     }
 
     // Load Home Assistant Key from file
-    File haKeyFile = SPIFFS.open("/haToken.txt","r");
+    File haKeyFile = LittleFS.open("/haToken.txt","r");
     String haKey = haKeyFile.readString();
     haKey.trim();
     haKeyFile.close();
@@ -188,7 +188,6 @@ void homeAssistantAction(const char* domain="",const char* entity="",const char*
         // buzzError();
     }
 
-  display.display();
   return;
 }
 

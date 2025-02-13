@@ -6,7 +6,7 @@
 // │  Server Endpoints  │
 // ╰────────────────────╯
 void handleRoot() {
-  File file = SPIFFS.open("/index.html","r"); // Load t he index page from SPIFFS
+  File file = LittleFS.open("/index.html","r"); // Load t he index page from LittleFS
   // server.send(200, "text/html", html);
   server.streamFile(file,"text/html");
   digitalWrite(BUZZPIN,HIGH);
@@ -17,7 +17,7 @@ void handleRoot() {
 
 void handleToken() {
   String token = server.arg("haToken");          // Retrieve token from POST data ("haToken")
-  File file = SPIFFS.open("/haToken.txt", "w");  // Open the file for writing (Creates if not there)
+  File file = LittleFS.open("/haToken.txt", "w");  // Open the file for writing (Creates if not there)
   if (!file) {                                   // Handle FS error
     server.send(500, "text/html", "Failed to open file for writing.");
     return;

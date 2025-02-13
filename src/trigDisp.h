@@ -31,7 +31,20 @@ int16_t panelWidth = 32;
 // │  Setup  │
 // ╰─────────╯
 void displaySetup(){
-  display.begin();
+
+  Serial.begin(115200);
+  Wire.begin();
+  Serial.println("Scanning I2C...");
+  for (byte i = 1; i < 127; i++) {
+    Wire.beginTransmission(i);
+    if (Wire.endTransmission() == 0) {
+      Serial.print("I2C device found at 0x");
+      Serial.println(i, HEX);
+    }
+  }
+
+
+  display.begin(SSD1306_SWITCHCAPVCC,SCREEN_ADDRESS);
   display.setTextColor(WHITE);
   display.clearDisplay();
   display.setRotation(1);
